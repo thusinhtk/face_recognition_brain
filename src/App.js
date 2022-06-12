@@ -3,9 +3,11 @@ import Navigation from './components/Navigation/Navigation';
 import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
-import './App.css';
 import Particles from "react-tsparticles";
 import { loadFull } from "tsparticles";
+import './App.css';
+import {MODEL_ID, MODEL_VERSION_ID, requestOptions} from './clarifai.js';
+
 
 const particlesOptions = {
   interactivity: {
@@ -101,6 +103,13 @@ class App extends Component{
 
   onButtonSubmit = () => {
     console.log('click');
+
+    //#region Clarifai API
+    fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", requestOptions)
+      .then(response => response.json())
+      .then(result => console.log(result))
+      .catch(error => console.log('error', error));
+    //#endregion
   }
 
   render(){    
