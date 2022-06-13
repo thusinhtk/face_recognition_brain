@@ -1,12 +1,13 @@
 import React, { Component }  from 'react';
+import Particles from "react-tsparticles";
+import { loadFull } from "tsparticles";
+import './App.css';
+import { USER_ID, PAT, APP_ID, MODEL_ID, MODEL_VERSION_ID } from './clarifai.js';
 import Navigation from './components/Navigation/Navigation';
 import Logo from './components/Logo/Logo';
 import ImageLinkForm from './components/ImageLinkForm/ImageLinkForm';
 import Rank from './components/Rank/Rank';
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
-import './App.css';
-import {MODEL_ID, MODEL_VERSION_ID, requestOptions} from './clarifai.js';
+import FaceRecognition from './components/FaceRecognition/FaceRecognition';
 
 
 const particlesOptions = {
@@ -94,20 +95,47 @@ class App extends Component{
     super();
     this.state = {
       input: '',
+      imageUrl:''
     }
   };
 
   onInputChange = (event) => {
-    console.log(event.target.value);
+    this.setState({input: event.target.value});
   }
 
   onButtonSubmit = () => {
-    console.log('click');
+    this.setState({imageUrl: this.state.input})
 
     //#region Clarifai API
-    fetch("https://api.clarifai.com/v2/models/" + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", requestOptions)
+    const IMAGE_URL = this.state.input;
+    const raw = JSON.stringify({
+      "user_app_id": {
+        "user_id": USER_ID,
+        "app_id": APP_ID
+      },
+      "inputs": [
+        {
+          "data": {
+            "image": {
+              "url": IMAGE_URL
+            }
+          }
+        }
+      ]
+    });
+    const requestOptions = {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Key ' + PAT
+      },
+      body: raw
+    };
+
+    fetch("https://api.clarifai.com/v2/models/"
+          + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", requestOptions)
       .then(response => response.json())
-      .then(result => console.log(result))
+      .then(result => console.log(result.outputs[0].data.regions[0].region_info.bounding_box))
       .catch(error => console.log('error', error));
     //#endregion
   }
@@ -124,15 +152,11 @@ class App extends Component{
         <Navigation />
         <Logo />
         <Rank />
-        <ImageLinkForm 
-          onInputChange={this.onInputChange} 
+        <ImageLinkForm
+          onInputChange={this.onInputChange}
           onButtonSubmit={this.onButtonSubmit}
         />
-        {
-          /*        
-          <FaceRecognition/>
-          */
-        }
+        <FaceRecognition imageUrl={this.state.imageUrl}/>
       </div>
     );
   }
