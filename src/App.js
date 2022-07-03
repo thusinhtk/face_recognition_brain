@@ -106,6 +106,7 @@ class App extends Component {
         name: '',
         email: '',
         entries: 0,
+        last: '',
         joined: ''
       }
     }
@@ -118,6 +119,7 @@ class App extends Component {
         name: data.name,
         email: data.email,
         entries: data.entries,
+        lasturl: data.lasturl,
         joined: data.joined
       }
     });
@@ -183,12 +185,14 @@ class App extends Component {
             method: 'put',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              id: this.state.user.id
+              id: this.state.user.id,
+              lasturl: IMAGE_URL
             })
           })
             .then(response => response.json())
-            .then(count => {
-              this.setState(Object.assign(this.state.user, { entries: count }));
+            .then(user => {
+              this.setState(Object.assign(this.state.user, { entries: user.entries}));
+              this.setState(Object.assign(this.state.user, { lasturl: user.lasturl}));
             })
         }
         this.displayFaceBox(this.calculateFaceLocation(result))
