@@ -145,7 +145,7 @@ class App extends Component {
     this.setState({ input: event.target.value });
   }
 
-  onButtonSubmit = () => {
+  onPictureSubmit = () => {
     this.setState({ imageUrl: this.state.input })
 
     //#region Clarifai API
@@ -177,9 +177,24 @@ class App extends Component {
     fetch("https://api.clarifai.com/v2/models/"
       + MODEL_ID + "/versions/" + MODEL_VERSION_ID + "/outputs", requestOptions)
       .then(response => response.json())
-      .then(result => this.displayFaceBox(this.calculateFaceLocation(result)))
+      .then(result => {
+        if (result) {
+          fetch('http://localhost:3000/image', {
+            method: 'put',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              id: this.state.user.id
+            })
+          })
+            .then(response => response.json())
+            .then(count => {
+              this.setState(Object.assign(this.state.user, { entries: count }));
+            })
+        }
+        this.displayFaceBox(this.calculateFaceLocation(result))
+      })
       .catch(error => console.log('error', error));
-    //#endregion 
+    //#endregion
   }
 
   onRouteChange = (route) =>{
@@ -210,7 +225,7 @@ class App extends Component {
               <Rank name={this.state.user.name} entries={this.state.user.entries} />
               <ImageLinkForm
                 onInputChange={this.onInputChange}
-                onButtonSubmit={this.onButtonSubmit}
+                onPictureSubmit={this.onPictureSubmit}
               />
               <FaceRecognition box={box} imageUrl={imageUrl} />
           </div>
