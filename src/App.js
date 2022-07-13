@@ -92,24 +92,26 @@ const particlesLoaded = (container) => {
   // console.log(container);
 };
 
+const initialState = {
+  input: '',
+  imageUrl: '',
+  box: {},
+  route: 'signin',
+  isSignedIn: false,
+  user: {
+    id: '',
+    name: '',
+    email: '',
+    entries: 0,
+    last: '',
+    joined: ''
+  }
+}
+
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: '',
-      imageUrl: '',
-      box: {},
-      route: 'signin',
-      isSignedIn: false,
-      user:{
-        id: '',
-        name: '',
-        email: '',
-        entries: 0,
-        last: '',
-        joined: ''
-      }
-    }
+    this.state = initialState;
   };
 
   loadUser= (data)=>{
@@ -194,6 +196,7 @@ class App extends Component {
               this.setState(Object.assign(this.state.user, { entries: user.entries}));
               this.setState(Object.assign(this.state.user, { lasturl: user.lasturl}));
             })
+            .catch(console.log)
         }
         this.displayFaceBox(this.calculateFaceLocation(result))
       })
@@ -201,14 +204,13 @@ class App extends Component {
     //#endregion
   }
 
-  onRouteChange = (route) =>{
+  onRouteChange = (route) => {
     if (route === 'signout') {
-      this.state.isSignedIn = false;
+      this.setState(initialState);
     }
     else if (route === 'home') {
-      this.state.isSignedIn = true;
+      this.setState({ isSignedIn: true });
     }
-
     this.setState({ route: route });
   }
 
